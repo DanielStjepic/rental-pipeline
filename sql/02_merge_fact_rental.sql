@@ -9,7 +9,7 @@
 -- Idempotent: rerunning the same batch changes 0 rows.
 -- =====================================================================
 
-BEGIN;
+--BEGIN;
 
 WITH latest AS (
     -- Step 1: one row per rental. Ties on last_update are broken by
@@ -70,4 +70,4 @@ WHEN NOT MATCHED THEN
 -- MERGE fails nothing is cleared and the batch can simply be rerun.
 -- TRUNCATE star.st_rental;
 
-COMMIT;
+--COMMIT;
