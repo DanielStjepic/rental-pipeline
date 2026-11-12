@@ -6,8 +6,9 @@ from psycopg.rows import TupleRow
 from psycopg import OperationalError
 import time
 from collections.abc import Callable
+import logging
 
-
+logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 MERGE_FILE_PATH = PROJECT_ROOT / 'sql' / '02_merge_fact_rental.sql'
@@ -50,8 +51,8 @@ def run_rental_merge() -> None:
         run_merge(conn)
         verify_merge(conn)
         aft = count_rows(conn, 'star.fact_rental')
-        print(f'Diff: {aft-bef} ')
-        print(f'Before: {bef}, after: {aft}')
+        logger.info('Diff: %s Before: %s, after: %s', aft-bef, bef, aft)
+
 
 def run_with_retry(func: Callable[[],None]) -> None:
     max_retries = 3
@@ -61,16 +62,17 @@ def run_with_retry(func: Callable[[],None]) -> None:
             break
         except OperationalError as err:
             if i != max_retries - 1:
-                print(f"Attempt no.{i + 1} failed {err}")
+                logger.warning("Attempt no.%s failed %s", i+1, err)
                 time.sleep(pow(2,i))
             else:
-                print(f"Attempt no.{i + 1} failed {err}")
+                logger.error("Attempt no.%s failed %s", i+1, err)
                 raise
 
 
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO, datefmt="%d.%m.%Y %H:%M:%S", format='%(asctime)s | %(levelname)s %(name)s | func: %(funcName)s at line %(lineno)d | %(message)s')
     run_with_retry(run_rental_merge)
     
     
