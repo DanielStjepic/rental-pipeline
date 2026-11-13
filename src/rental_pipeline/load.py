@@ -7,6 +7,7 @@ from psycopg import OperationalError
 import time
 from collections.abc import Callable
 import logging
+from rental_pipeline.retry import run_with_retry
 
 logger = logging.getLogger(__name__)
 
@@ -54,26 +55,11 @@ def run_rental_merge() -> None:
         logger.info('Diff: %s Before: %s, after: %s', aft-bef, bef, aft)
 
 
-def run_with_retry(func: Callable[[],None]) -> None:
-    max_retries = 3
-    for i in range(max_retries):
-        try:
-            func()
-            break
-        except OperationalError as err:
-            if i != max_retries - 1:
-                logger.warning("Attempt no.%s failed %s", i+1, err)
-                time.sleep(pow(2,i))
-            else:
-                logger.error("Attempt no.%s failed %s", i+1, err)
-                raise
-
-
 
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO, datefmt="%d.%m.%Y %H:%M:%S", format='%(asctime)s | %(levelname)s %(name)s | func: %(funcName)s at line %(lineno)d | %(message)s')
-    run_with_retry(run_rental_merge)
+    run_with_retry(run_rental_merge, retry_on=(OperationalError,))
     
     
     
