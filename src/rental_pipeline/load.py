@@ -12,7 +12,7 @@ from rental_pipeline.retry import run_with_retry
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-MERGE_FILE_PATH = PROJECT_ROOT / 'sql' / '02_merge_fact_rental.sql'
+MERGE_FILE_PATH = PROJECT_ROOT / 'sql' / 'rental' / '02_merge_fact_rental.sql'
 def read_sql(path: Path | str) -> str:
     with open(path, encoding='utf-8') as f:
         return f.read()
@@ -25,7 +25,7 @@ def count_rows(conn: Connection[TupleRow], table: str) -> int:
         if row is None:
             raise RuntimeError(f"Count(*) from {table} returned an unexpected value")
         return row[0]
-
+    
 
 
 
