@@ -1,5 +1,6 @@
+import logging
+import time
 from collections.abc import Callable
-import logging, time
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,11 @@
+import json
+
+import pytest
+import requests
+
 from rental_pipeline import fda
-import requests,pytest, json
 from rental_pipeline.fda import TransientApiException
+
 
 def test_short_page_stop_loop(monkeypatch):
     calls = []
@@ -115,7 +120,7 @@ def test_fetch_page_returns_503(monkeypatch):
         return resp
     
     monkeypatch.setattr(fda.requests, "get", fake_requests_get)
-    with pytest.raises(TransientApiException) as exc:
+    with pytest.raises(TransientApiException):
         fda.fetch_page(2,0)
 
 @pytest.mark.parametrize("status_code, expected",[(503, TransientApiException),(429,TransientApiException), (400,requests.HTTPError), (404, requests.HTTPError)], ids=['503','429','400','404'])

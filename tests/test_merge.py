@@ -1,5 +1,10 @@
 from rental_pipeline.db import get_connection
-from rental_pipeline.load import PROJECT_ROOT, read_sql,run_merge, run_rental_merge, verify_merge, count_rows
+from rental_pipeline.load import (
+    PROJECT_ROOT,
+    count_rows,
+    read_sql,
+    run_rental_merge,
+)
 
 BUILD_FILE_PATH = PROJECT_ROOT / 'sql' / 'rental' / '01_build_warehouse.sql' 
 def test_database_integration(monkeypatch):
@@ -18,10 +23,9 @@ def test_database_integration(monkeypatch):
 
 def helper_fresh_database_build_insert(monkeypatch):
     monkeypatch.setenv("PG_DBNAME", "pagila_test")
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            query = read_sql(BUILD_FILE_PATH)
-            cur.execute(query)
+    with get_connection() as conn, conn.cursor() as cur:
+        query = read_sql(BUILD_FILE_PATH)
+        cur.execute(query)
 
 
     
@@ -49,12 +53,11 @@ def test_merging_staging_to_fact_rental(monkeypatch):
     with get_connection() as conn:
         after2 = count_rows(conn, 'star.fact_rental')
 
-    with get_connection() as conn:
-        with conn.cursor() as cur:
+    with get_connection() as conn, conn.cursor() as cur:
 
-            query = 'SELECT return_date_key from star.fact_rental where rental_id = 900003'
-            cur.execute(query)
-            dedup = cur.fetchall()
+        query = 'SELECT return_date_key from star.fact_rental where rental_id = 900003'
+        cur.execute(query)
+        dedup = cur.fetchall()
 
     distincts = [x[0] for x in records]
     assert after1 == before + len(set(distincts))
