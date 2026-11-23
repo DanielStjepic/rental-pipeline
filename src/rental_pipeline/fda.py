@@ -1,8 +1,13 @@
-import requests, logging, time
+import functools
+import logging
+import time
 from typing import Any
-from psycopg.types.json import Jsonb
+
+import requests
 from psycopg import Connection
 from psycopg.rows import TupleRow
+from psycopg.types.json import Jsonb
+
 from rental_pipeline.db import get_connection
 from rental_pipeline.retry import run_with_retry
 
@@ -29,7 +34,7 @@ def fetch_all_pages(limit: int, max_pages: int = 5) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     for _ in range(max_pages):
         try:
-            page = run_with_retry(lambda: fetch_page(limit,skip), retry_on=(TransientApiException, requests.Timeout, requests.ConnectionError))
+            page = run_with_retry(functools.partial(fetch_page, limit, skip), retry_on=(TransientApiException, requests.Timeout, requests.ConnectionError))
             records.extend(page)
         except requests.HTTPError as err:
             if err.response is None:    

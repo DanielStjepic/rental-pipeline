@@ -1,10 +1,9 @@
+import os
+
 import psycopg
 from dotenv import load_dotenv
-import os
 from psycopg import Connection
 from psycopg.rows import TupleRow
-
-
 
 load_dotenv()
 def get_connection() -> Connection[TupleRow]:

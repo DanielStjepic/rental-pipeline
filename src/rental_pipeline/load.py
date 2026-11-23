@@ -1,12 +1,10 @@
-from psycopg import sql
-from pathlib import Path
-from rental_pipeline.db import get_connection
-from psycopg import Connection
-from psycopg.rows import TupleRow
-from psycopg import OperationalError
-import time
-from collections.abc import Callable
 import logging
+from pathlib import Path
+
+from psycopg import Connection, OperationalError, sql
+from psycopg.rows import TupleRow
+
+from rental_pipeline.db import get_connection
 from rental_pipeline.retry import run_with_retry
 
 logger = logging.getLogger(__name__)
@@ -42,7 +40,7 @@ def verify_merge(conn: Connection[TupleRow]) -> None:
         result = cur.execute(query)
         row = result.fetchone()
         if row is None:
-            raise RuntimeError(f"Verification query returned no row")
+            raise RuntimeError("Verification query returned no row")
         if row[0] != 0:
             raise RuntimeError(f"There are missing rentals in star.fact_rental table: {row[0]}")
 
